@@ -77,10 +77,10 @@ def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tup
         energy = float(song['energy'])
         acousticness = float(song['acousticness'])
 
-        score = genre_match            # 1.0 match or 0.0 if not
+        score = (2 * genre_match           # 1.0 match or 0.0 if not
         + mood_match             # 1.0 or 0.0
         + (1 - abs(energy - user_prefs['target_energy']))
-        + (1 - abs(acousticness - user_prefs['likes_acoustic']))
+        + (1 - abs(acousticness - user_prefs['likes_acoustic'])))
         song['score'] = score
 
     #rec_songs = sorted([(song, song['score'], "Explanation placeholder") for song in songs], key=lambda x: x[1], reverse=True)[:k] #compressed version of below code
