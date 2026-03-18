@@ -72,14 +72,7 @@ def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tup
 
     #scoring:
     for song in songs:
-        user_genre = user_prefs['favorite_genre']
-        song_genre = song['genre']
-        if song_genre == user_genre:
-            genre_match = 1.0  # exact match
-        elif user_genre in song_genre or song_genre in user_genre:
-            genre_match = 0.5  # partial match (e.g. "pop" in "indie pop")
-        else:
-            genre_match = 0.0
+        genre_match = 1.0 if song['genre'] == user_prefs['favorite_genre'] else 0.0 or (0.5 if user_prefs['favorite_genre'] in song['genre'] or song['genre'] in user_prefs['favorite_genre'] else 0.0)
         mood_match = 1.0 if song['mood'] == user_prefs['favorite_mood'] else 0.0
         energy = float(song['energy'])
         acousticness = float(song['acousticness'])
@@ -98,7 +91,20 @@ def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tup
     for song in songs:
         #song_title = song['title']
         score = song['score']
-        explanation = "Explanation Placeholder"
+        #Make Explanation:
+        reasons = []
+        if song['genre'] == user_prefs['favorite_genre']:
+            reasons.append(f"{song['title']} matches your favorite genre ({user_prefs['favorite_genre']})")
+        elif user_prefs['favorite_genre'] in song['genre'] or song['genre'] in user_prefs['favorite_genre']:
+            reasons.append(f"It's close to your favorite genre ({song['genre']})")
+        if song['mood'] == user_prefs['favorite_mood']:
+            reasons.append(f"matches your go-to mood ({user_prefs['favorite_mood']})")
+        if abs(float(song['energy']) - user_prefs['target_energy']) < 0.1:
+            reasons.append(f"has energy close to your target")
+        if user_prefs['likes_acoustic'] and float(song['acousticness']) > 0.6:
+            reasons.append("The song is acoustic 🎸, which you like")
+        explanation = ", and ".join(reasons) if reasons else "matches some of your preferences"
+
         rec_songs.append((song, score, explanation))
     rec_songs = sorted(rec_songs, key=lambda x: x[1], reverse=True)[:k]
 
