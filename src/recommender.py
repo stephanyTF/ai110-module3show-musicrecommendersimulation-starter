@@ -72,7 +72,14 @@ def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tup
 
     #scoring:
     for song in songs:
-        genre_match = 1.0 if song['genre'] == user_prefs['favorite_genre'] else 0.0
+        user_genre = user_prefs['favorite_genre']
+        song_genre = song['genre']
+        if song_genre == user_genre:
+            genre_match = 1.0  # exact match
+        elif user_genre in song_genre or song_genre in user_genre:
+            genre_match = 0.5  # partial match (e.g. "pop" in "indie pop")
+        else:
+            genre_match = 0.0
         mood_match = 1.0 if song['mood'] == user_prefs['favorite_mood'] else 0.0
         energy = float(song['energy'])
         acousticness = float(song['acousticness'])
