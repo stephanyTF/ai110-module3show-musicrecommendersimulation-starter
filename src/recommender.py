@@ -1,3 +1,4 @@
+import csv
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 
@@ -52,7 +53,14 @@ def load_songs(csv_path: str) -> List[Dict]:
     """
     # TODO: Implement CSV loading logic
     print(f"Loading songs from {csv_path}...")
-    return []
+    #read CSV and return list of song dictionaries
+    songs = []
+    with open(csv_path, newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            songs.append(row)
+
+    return songs
 
 def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
     """
@@ -61,4 +69,30 @@ def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tup
     """
     # TODO: Implement scoring and ranking logic
     # Expected return format: (song_dict, score, explanation)
-    return []
+
+    #scoring:
+    for song in songs:
+        genre_match = 1.0 if song['genre'] == user_prefs['favorite_genre'] else 0.0
+        mood_match = 1.0 if song['mood'] == user_prefs['favorite_mood'] else 0.0
+        energy = float(song['energy'])
+        acousticness = float(song['acousticness'])
+
+        score = genre_match            # 1.0 match or 0.0 if not
+        + mood_match             # 1.0 or 0.0
+        + (1 - abs(energy - user_prefs['target_energy']))
+        + (1 - abs(acousticness - user_prefs['likes_acoustic']))
+        song['score'] = score
+
+    #rec_songs = sorted([(song, song['score'], "Explanation placeholder") for song in songs], key=lambda x: x[1], reverse=True)[:k] #compressed version of below code
+    
+    #create list of tuples (song, score, explanation) and sort by score
+
+    rec_songs = []
+    for song in songs:
+        #song_title = song['title']
+        score = song['score']
+        explanation = "Explanation Placeholder"
+        rec_songs.append((song, score, explanation))
+    rec_songs = sorted(rec_songs, key=lambda x: x[1], reverse=True)[:k]
+
+    return rec_songs   
